@@ -1,1 +1,3 @@
-dataset/*
+artifact/**
+datasets/**
+**/__pycache__/**
