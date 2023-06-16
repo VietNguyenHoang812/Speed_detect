@@ -116,7 +116,7 @@ def sorted_boxes(dt_boxes):
         sorted boxes(array) with shape [4, 2]
     """
     num_boxes = dt_boxes.shape[0]
-    print(dt_boxes)
+    # print(dt_boxes)
     # if abs(num_boxes - 2) < 1e-4:
     #     sorted_boxes = sorted(dt_boxes, key=lambda x: (x[1], x[0]))
     # else:

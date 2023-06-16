@@ -19,6 +19,8 @@ logger = get_logger()
 from ppocr.utils.utility import check_and_read, get_image_file_list, init_args
 from ppocr.utils.network import maybe_download, download_with_progressbar, is_link, confirm_model_dir_url
 from tools.infer.utility import draw_ocr, str2bool, check_gpu
+# from utils.singleton import SingleInstanceMetaClass
+
 
 __all__ = [
     'PaddleOCR', 'draw_ocr', 'download_with_progressbar'

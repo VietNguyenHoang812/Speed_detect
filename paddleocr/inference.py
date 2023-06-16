@@ -1,8 +1,15 @@
 from paddleocr import PaddleOCR
 
 
-ocr = PaddleOCR(use_gpu=True) # need to run only once to download and load model into memory
-img_path = 'crop/test.jpg'
-result = ocr.ocr(img_path)
-for line in result:
-    print(line)
+def predict_plate(image, threshold: float=0.95):
+    ocr = PaddleOCR(use_gpu=False, show_log=False) # need to run only once to download and load model into memory
+    result = ocr.ocr(image)
+    plate_numer = ""
+    for _, prediction in result:
+        text, score = prediction
+        if score < threshold:
+            continue
+        text = text.replace(".","")
+        plate_numer += text
+    
+    return plate_numer
