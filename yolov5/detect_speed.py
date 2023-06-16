@@ -4,6 +4,7 @@ from pathlib import Path
 
 import torch
 import math
+import numpy as np
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -19,10 +20,10 @@ from utils.torch_utils import select_device, smart_inference_mode
 
 
 @smart_inference_mode()
-def detect_plate(
+def detect_speed(
         weights=ROOT / 'yolov5s.pt',  # model path or triton URL
         source=ROOT / 'data/images',  # file/dir/URL/glob/screen/0(webcam)
-        threshold = 0.9,
+        threshold = 0.4,
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.25,  # confidence threshold
@@ -67,10 +68,12 @@ def detect_plate(
             pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
 
         # Process predictions
-        cropped_image, min_distance, score = None, 1e7, None
-        original_image = cv2.imread(source)
-        ho_center, wo_center = original_image.shape[0]/2, original_image.shape[1]/2
+        # cropped_image, min_distance, score = None, 1e7, None
+        # original_image = cv2.imread(source)
+        # ho_center, wo_center = original_image.shape[0]/2, original_image.shape[1]/2
         
+        print(pred)
+        speed = ""
         for det in pred:  # per image
             im0 = im0s.copy()
             if len(det):
@@ -78,20 +81,20 @@ def detect_plate(
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
-                    if conf.numpy() < threshold:
-                        continue
-                    crop, xyxy = crop_image(xyxy, im0, BGR=True)
-                    xyxy = xyxy.numpy()
-                    hcrop_center = (xyxy[0][0]+xyxy[0][2])/2
-                    wcrop_center = (xyxy[0][1]+xyxy[0][3])/2
+                    if conf.numpy() >= threshold:
+                        speed += str(int(cls))
+                    _, xyxy = crop_image(xyxy, im0, BGR=True)
+                    lefttop_width = xyxy.numpy()[1]
+                    # hcrop_center = (xyxy[0][0]+xyxy[0][2])/2
+                    # wcrop_center = (xyxy[0][1]+xyxy[0][3])/2
 
-                    center_distance = compare_center((ho_center, wo_center), (hcrop_center, wcrop_center))
-                    if min_distance > center_distance:
-                        min_distance = center_distance
-                        cropped_image = crop
-                        score = conf
+                    # center_distance = compare_center((ho_center, wo_center), (hcrop_center, wcrop_center))
+                    # if min_distance > center_distance:
+                    #     min_distance = center_distance
+                    #     cropped_image = crop
+                    #     score = conf
 
-        return cropped_image, score
+        return speed
 
 def crop_image(xyxy, im, gain=1.02, pad=10, square=False, BGR=False, save=True):
     xyxy = torch.tensor(xyxy).view(-1, 4)
@@ -105,20 +108,19 @@ def crop_image(xyxy, im, gain=1.02, pad=10, square=False, BGR=False, save=True):
 
     return crop, xyxy
 
-def compare_center(ori_center, crop_center):
-    ho, wo = ori_center
-    hcrop, wcrop = crop_center
-
-    return math.sqrt((ho-hcrop)**2+(wo-wcrop)**2)
-
-
 if __name__ == '__main__':
     # opt = parse_opt()
     # main(opt)
-    weights_pathfile = "weights/license_plate_detection.pt"
+    weights_pathfile = "weights/speed_detection.pt"
     test_image_pathfile = "test.JPG"
+    preprocessed_image_pathfile = "temp.jpg"
 
-    crop, score = detect_plate(weights=weights_pathfile, source=test_image_pathfile)
-    cv2.imshow("crop", crop)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows
+    lower = np.array([140, 25, 220])
+    upper = np.array([179, 255, 255])
+    ori_image = cv2.imread(test_image_pathfile)
+    hsv_image = cv2.cvtColor(ori_image, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv_image, lower, upper)
+    preprocessed = cv2.bitwise_and(ori_image, ori_image, mask=mask)
+    cv2.imwrite(preprocessed_image_pathfile, preprocessed)
+    speed = detect_speed(weights=weights_pathfile, source=preprocessed_image_pathfile)
+    print(speed)
