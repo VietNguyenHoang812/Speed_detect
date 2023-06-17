@@ -22,7 +22,7 @@ import numpy as np
 import psutil
 import torch
 import torch.nn.functional as F
-import torchvision
+# import torchvision
 import yaml
 from PIL import ExifTags, Image, ImageOps
 from torch.utils.data import DataLoader, Dataset, dataloader, distributed
