@@ -2,7 +2,7 @@ from paddleocr import PaddleOCR
 
 
 def ocr_plate(image, threshold: float=0.95):
-    ocr = PaddleOCR(use_gpu=False, show_log=False) # need to run only once to download and load model into memory
+    ocr = PaddleOCR(use_gpu=True, show_log=False) # need to run only once to download and load model into memory
     result = ocr.ocr(image)
     plate_numer = ""
     for _, prediction in result:

@@ -78,7 +78,7 @@ def detect_plate(
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
-                    if conf.numpy() < threshold:
+                    if conf.cpu().numpy() < threshold:
                         continue
                     crop, xyxy = crop_image(xyxy, im0, BGR=True)
                     xyxy = xyxy.numpy()
