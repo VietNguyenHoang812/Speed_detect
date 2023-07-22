@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
+from PIL import Image
 from models.common import DetectMultiBackend
 from utils.dataloaders import LoadImages
 from utils.general import (Profile, check_img_size, cv2, clip_boxes,
@@ -102,6 +103,11 @@ def crop_image(xyxy, im, gain=1.02, pad=10, square=False, BGR=False, save=True):
     xyxy = xywh2xyxy(b).long()
     clip_boxes(xyxy, im.shape)
     crop = im[int(xyxy[0, 1]):int(xyxy[0, 3]), int(xyxy[0, 0]):int(xyxy[0, 2]), ::(1 if BGR else -1)]
+    # if save:
+    # #     file.parent.mkdir(parents=True, exist_ok=True)  # make directory
+    # #     f = str(increment_path(file).with_suffix('.jpg'))
+    # #     # cv2.imwrite(f, crop)  # save BGR, https://github.com/ultralytics/yolov5/issues/7007 chroma subsampling issue
+    #     Image.fromarray(crop[..., ::-1]).save("cropped.jpg", quality=95, subsampling=0)  # save RGB
 
     return crop, xyxy
 
@@ -119,6 +125,7 @@ if __name__ == '__main__':
     test_image_pathfile = "test.JPG"
 
     crop, score = detect_plate(weights=weights_pathfile, source=test_image_pathfile)
-    cv2.imshow("crop", crop)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows
+    
+    # cv2.imshow("crop", crop)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows

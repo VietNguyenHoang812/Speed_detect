@@ -1,3 +1,4 @@
 artifact/**
 datasets/**
 **/__pycache__/**
+**/**.docx
