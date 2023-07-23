@@ -1,4 +1,5 @@
 artifact/**
 datasets/**
+weights/**
 **/__pycache__/**
-**/**.docx
+report/**

@@ -6,15 +6,15 @@ def ocr_plate(image, threshold: float=0.95):
     result = ocr.ocr(image)
     for line in result:
         print(line)
-    # plate_numer = ""
-    # for _, prediction in result:
-    #     text, score = prediction
-    #     if score < threshold:
-    #         continue
-    #     text = text.replace(".","")
-    #     plate_numer += text
+    plate_numer = ""
+    for _, prediction in result:
+        text, score = prediction
+        if score < threshold:
+            continue
+        text = text.replace(".","")
+        plate_numer += text
     
-    # return plate_numer
+    return plate_numer
 
 
 if __name__ == "__main__":

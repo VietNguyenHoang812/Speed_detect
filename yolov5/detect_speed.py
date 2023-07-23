@@ -86,21 +86,21 @@ def detect_speed(
                     if conf < threshold:
                         continue
                     _, xyxy = crop_image(xyxy, im0, BGR=True)
-                    lefttop_width = xyxy.numpy()[0][1]
+                    left_width = xyxy.numpy()[0][0]
                     if len(preds_list) <= 2:
                         if min_conf > conf:
                             min_conf = conf
-                            preds_list.append([lefttop_width, int(cls), conf])
+                            preds_list.append([left_width, int(cls), conf])
                         else:
-                            preds_list.insert(0, [lefttop_width, int(cls), conf])
+                            preds_list.insert(0, [left_width, int(cls), conf])
                     else:
                         if min_conf > conf:
                             preds_list.pop()
                             if conf < preds_list[0][2]:
                                 min_conf = conf
-                                preds_list.append([lefttop_width, int(cls), conf])
+                                preds_list.append([left_width, int(cls), conf])
                             else:
-                                preds_list.insert(0, [lefttop_width, int(cls), conf])
+                                preds_list.insert(0, [left_width, int(cls), conf])
                             
                     # hcrop_center = (xyxy[0][0]+xyxy[0][2])/2
                     # wcrop_center = (xyxy[0][1]+xyxy[0][3])/2
@@ -110,8 +110,8 @@ def detect_speed(
                     #     min_distance = center_distance
                     #     cropped_image = crop
                     #     score = conf
-        (lt_1, n1, _), (lt_2, n2, _) = preds_list
-        if lt_1 < lt_2:
+        (left_1, n1, _), (left2, n2, _) = preds_list
+        if left_1 < left2:
             return n1*10+n2
         else:
             return n2*10+n1

@@ -1,5 +1,8 @@
-l = [
-    [1, 5, 2],
-    [2, 3, 1]
-]
-print(sorted(l, key=2))
+import cv2
+
+
+test = "P1680238.JPG"
+test = cv2.imread(test)
+cv2.imshow("test", test)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
