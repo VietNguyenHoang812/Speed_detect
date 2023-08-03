@@ -1,2 +1,0 @@
-FROM opencvcourses/opencv-docker:latest
-WORKDIR /app

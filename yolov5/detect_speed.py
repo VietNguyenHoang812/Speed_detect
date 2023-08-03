@@ -150,7 +150,7 @@ if __name__ == '__main__':
     # opt = parse_opt()
     # main(opt)
     weights_pathfile = "weights/speed_detection.pt"
-    test_image_pathfile = "test.JPG"
+    test_image_pathfile = "P1680346.JPG"
     # preprocessed_image_pathfile = "temp.jpg"
 
     speed = process(weights_pathfile, test_image_pathfile)
