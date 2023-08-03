@@ -29,7 +29,7 @@ threshold = 0.5
 overlay = "box,labels,conf"
 
 # load the object detection network
-net = jetson_inference.detectNet(network, sys.argv, threshold)
+net = jetson_inference.detectNet(argv=["--model=networks/az_ocr/az_ocr_ssdmobilenetv1_2.onnx", "--labels=networks/az_ocr/labels.txt", "--input-blob=input_0", "--output-cvg=scores", "--output-bbox=boxes"], threshold=0.5)
 
 img = jetson_utils.loadImage("resized.jpg")
 
