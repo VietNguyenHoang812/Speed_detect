@@ -4,21 +4,6 @@ import jetson_utils
 from typing import List, Dict
 
 
-# network = "ssd-mobilenet-v2"
-threshold = 0.6
-overlay = "box,labels,conf"
-
-# load the object detection network
-net = jetson_inference.detectNet(argv=[
-		"--model=networks/az_ocr/az_ocr_ssdmobilenetv1_2.onnx", 
-		"--labels=networks/az_ocr/labels.txt", 
-		"--input-blob=input_0", 
-		"--output-cvg=scores", 
-		"--output-bbox=boxes"
-	], 
-	threshold=threshold
-)
-
 def ocr_plate(img_pathfile: str = "cropped.jpg") -> str:
 	predictions = process(img_pathfile)
 	license_plate = postprocess(predictions)
@@ -26,7 +11,21 @@ def ocr_plate(img_pathfile: str = "cropped.jpg") -> str:
 	return license_plate
 
 def process(img_pathfile: str = "cropped.jpg") -> List[Dict]:
+	threshold = 0.6
+	overlay = "box,labels,conf"
 	img = jetson_utils.loadImage(img_pathfile)
+
+	# load the object detection network
+	net = jetson_inference.detectNet(argv=[
+			"--model=networks/az_ocr/az_ocr_ssdmobilenetv1_2.onnx", 
+			"--labels=networks/az_ocr/labels.txt", 
+			"--input-blob=input_0", 
+			"--output-cvg=scores", 
+			"--output-bbox=boxes"
+		], 
+		threshold=threshold
+	)
+
 	# detect objects in the image (with overlay)
 	detections = net.Detect(img, overlay=overlay)
 	print("detected {:d} objects in image".format(len(detections)))
@@ -70,7 +69,6 @@ def postprocess(predictions: List[Dict]) -> str:
 	
 	return license_plate
 
-# print out performance info
-# net.PrintProfilerTimes()
 
-
+if __name__ == "__main__":
+	print(ocr_plate())
