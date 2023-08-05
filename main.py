@@ -1,6 +1,7 @@
 from yolov5.detect import detect_plate
 from yolov5.detect_speed import process
-from paddleocr.inference import ocr_plate
+# from paddleocr.inference import ocr_plate
+from detectnet_image import ocr_plate
 
 
 weights_plate_pathfile = "weights/license_plate_detection.pt"
