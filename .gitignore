@@ -3,3 +3,5 @@ datasets/**
 weights/**
 **/__pycache__/**
 report/**
+.bash_history
+.python_history
