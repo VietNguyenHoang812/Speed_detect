@@ -1,5 +1,6 @@
 import os
 import sys
+import yaml
 from pathlib import Path
 
 import torch
@@ -20,7 +21,7 @@ from utils.torch_utils import select_device, smart_inference_mode
 
 
 @smart_inference_mode()
-def detect_plate(
+def ocr_plate(
         weights=ROOT / 'yolov5s.pt',  # model path or triton URL
         source=ROOT / 'data/images',  # file/dir/URL/glob/screen/0(webcam)
         threshold = 0.9,
@@ -37,6 +38,11 @@ def detect_plate(
         vid_stride=1,  # video frame-rate stride
 ):
     source = str(source)
+
+    # Load config
+    config_path = "/home/vietnh/Documents/project/speed_detect/yolov5/data/license_plate_ocr.yaml"
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file)
 
     # Load model
     device = select_device(device)
@@ -68,67 +74,25 @@ def detect_plate(
             pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
 
         # Process predictions
-        cropped_image, cropped_savename, min_distance, score = None, "cropped.jpg", 1e7, None
-        original_image = cv2.imread(source)
-        ho_center, wo_center = original_image.shape[0]/2, original_image.shape[1]/2
-        
+        plate = ""
         for det in pred:  # per image
-            im0 = im0s.copy()
             if len(det):
-                # Rescale boxes from img_size to im0 size
-                det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
-                # Write results
-                for *xyxy, conf, cls in reversed(det):
-                    if conf.cpu().numpy() < threshold:
+                det = det.cpu().tolist()
+                for box in det:
+                    score, label = box[4], int(box[5])
+                    label_name = config["names"][label]
+                    if label_name == "background":
                         continue
-                    crop, xyxy = crop_image(xyxy, im0, BGR=True)
-                    xyxy = xyxy.numpy()
-                    hcrop_center = (xyxy[0][0]+xyxy[0][2])/2
-                    wcrop_center = (xyxy[0][1]+xyxy[0][3])/2
+                    if score < threshold:
+                        continue
+                    plate += f"{label_name}"
 
-                    center_distance = compare_center((ho_center, wo_center), (hcrop_center, wcrop_center))
-                    if min_distance > center_distance:
-                        min_distance = center_distance
-                        cropped_image = crop
-                        score = conf
-
-        cv2.imwrite(cropped_savename, cropped_image)
-
-        return cropped_image, cropped_savename, score
-
-def crop_image(xyxy, im, gain=1.02, pad=10, square=False, BGR=False, save=True):
-    xyxy = torch.tensor(xyxy).view(-1, 4)
-    b = xyxy2xywh(xyxy)  # boxes
-    if square:
-        b[:, 2:] = b[:, 2:].max(1)[0].unsqueeze(1)  # attempt rectangle to square
-    b[:, 2:] = b[:, 2:] * gain + pad  # box wh * gain + pad
-    xyxy = xywh2xyxy(b).long()
-    clip_boxes(xyxy, im.shape)
-    crop = im[int(xyxy[0, 1]):int(xyxy[0, 3]), int(xyxy[0, 0]):int(xyxy[0, 2]), ::(1 if BGR else -1)]
-    # if save:
-    # #     file.parent.mkdir(parents=True, exist_ok=True)  # make directory
-    # #     f = str(increment_path(file).with_suffix('.jpg'))
-    # #     # cv2.imwrite(f, crop)  # save BGR, https://github.com/ultralytics/yolov5/issues/7007 chroma subsampling issue
-    #     Image.fromarray(crop[..., ::-1]).save("cropped.jpg", quality=95, subsampling=0)  # save RGB
-
-    return crop, xyxy
-
-def compare_center(ori_center, crop_center):
-    ho, wo = ori_center
-    hcrop, wcrop = crop_center
-
-    return math.sqrt((ho-hcrop)**2+(wo-wcrop)**2)
+        return plate
 
 
 if __name__ == '__main__':
-    # opt = parse_opt()
-    # main(opt)
-    weights_pathfile = "weights/license_plate_detection.pt"
     weights_ocr_pathfile = "weights/license_plate_ocr.pt"
-    test_image_pathfile = "test.JPG"
+    cropped_image_pathfile = "cropped.jpg"
 
-    crop, _, score = detect_plate(weights=weights_ocr_pathfile, source=test_image_pathfile)
-    
-    # cv2.imshow("crop", crop)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows
+    plate = ocr_plate(weights=weights_ocr_pathfile, source=cropped_image_pathfile, threshold = 0.8)
+    print(plate)
