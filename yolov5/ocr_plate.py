@@ -12,16 +12,15 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-from PIL import Image
+from typing import List, Dict
 from models.common import DetectMultiBackend
 from utils.dataloaders import LoadImages
-from utils.general import (Profile, check_img_size, cv2, clip_boxes,
-                           non_max_suppression, scale_boxes, xyxy2xywh, xywh2xyxy)
+from utils.general import (Profile, check_img_size, non_max_suppression)
 from utils.torch_utils import select_device, smart_inference_mode
 
 
 @smart_inference_mode()
-def ocr_plate(
+def process(
         weights=ROOT / 'yolov5s.pt',  # model path or triton URL
         source=ROOT / 'data/images',  # file/dir/URL/glob/screen/0(webcam)
         threshold = 0.9,
@@ -73,22 +72,67 @@ def ocr_plate(
         with dt[2]:
             pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
 
+        predictions = []
         # Process predictions
-        plate = ""
         for det in pred:  # per image
             if len(det):
                 det = det.cpu().tolist()
                 for box in det:
-                    score, label = box[4], int(box[5])
+                    left, top, score, label = box[0], box[1], box[4], int(box[5])
                     label_name = config["names"][label]
+                    # print(box[:4], label_name)
                     if label_name == "background":
                         continue
                     if score < threshold:
                         continue
-                    plate += f"{label_name}"
+                    prediction = {
+                        "Value": str(label_name),
+                        "Score": score,
+                        "Top": top,
+                        "Left": left,
+                        "Sum": top+left,
+                    }
+                    predictions.append(prediction)
+            break
 
-        return plate
+        return predictions
+    
+def postprocess(predictions: List[Dict]) -> str:
+    if len(predictions) < 7:
+        return str(len(predictions))
+    license_plate = ""
+    sorted_list = sorted(predictions, key=lambda i: (i["Sum"], i["Top"]))
+    if sorted_list[0]["Left"] > sorted_list[1]["Left"]:
+        first = sorted_list.pop(0)
+    else:
+        first = sorted_list.pop(1)
 
+    license_plate += first["Value"]
+    while sorted_list:
+        top_first = first["Top"]
+        left_first = 9999
+        index_pop = -1
+        for i, p in enumerate(sorted_list):
+            top_p, left_p = p["Top"], p["Left"]
+            if top_p > 0.8*top_first and top_p < 1.2*top_first and left_p < left_first:
+                index_pop = i
+                left_first = left_p
+        if index_pop == -1:
+            sorted_list = sorted(sorted_list, key=lambda i: i["Sum"])
+            index_pop = 0
+
+        first = sorted_list.pop(index_pop)
+        license_plate += first["Value"]
+    
+    return license_plate
+
+def ocr_plate(weights, source, threshold = 0.6):
+    predictions = process(weights=weights, source=source, threshold=threshold)
+    if len(predictions) == 0:
+        return "none"
+    license_plate = postprocess(predictions)
+    
+    return license_plate
 
 if __name__ == '__main__':
     weights_ocr_pathfile = "weights/license_plate_ocr.pt"

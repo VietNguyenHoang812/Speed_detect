@@ -1,6 +1,8 @@
 artifact/**
 datasets/**
+images/**/**
 weights/**
+**/runs/**
 **/__pycache__/**
 report/**
 .bash_history
