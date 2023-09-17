@@ -39,7 +39,7 @@ def process(
     source = str(source)
 
     # Load config
-    config_path = "/home/vietnh/Documents/project/speed_detect/yolov5/data/license_plate_ocr.yaml"
+    config_path = "yolov5/license_plate_ocr.yaml" 
     with open(config_path, "r") as file:
         config = yaml.safe_load(file)
 
