@@ -105,7 +105,7 @@ class YoloTRT():
             det_res.append(det)
             # self.PlotBbox(box, img, label="{}:{:.2f}".format(self.categories[int(result_classid[j])], result_scores[j]),)
             crops.append(self.Crop(box, img))
-        return det_res, t2-t1
+        return det_res, t2-t1, crops
 
     def PostProcess(self, output, origin_h, origin_w):
         num = int(output[0])

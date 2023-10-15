@@ -33,23 +33,23 @@ class AbstractYoloTRT():
 
 class LicensePlateDetection(AbstractYoloTRT):    
     def process(self):
-        detections, t, crops = self.model(self.image)
+        detections, t, crops = self.model.Inference(self.image)
         return (detections, t, crops)
     
-    def postprocess(self, process_results, is_saved: bool = False):
+    def postprocess(self, process_results, is_saved: bool = True):
         detections, t, crops = process_results
         if len(detections) == 0:
             return None
         
         ho_center, wo_center = self.ori_height/2, self.ori_width/2
         crop_index, min_distance, score = 0, 1e9, 0
-        for i in len(range(detections)):  # per image
+        for i in range(len(detections)):  # per image
             conf, box = detections[i]["conf"], detections[i]["box"]
             if conf < self.score_threshold:
                 continue
             hcrop_center, wcrop_center = (box[0]+box[2])/2, (box[1]+box[3])/2
             min_distance = 1e9
-            center_distance = self.compare_center((ho_center, wo_center), (hcrop_center, wcrop_center))
+            center_distance = calculate_distance((ho_center, wo_center), (hcrop_center, wcrop_center))
             if min_distance > center_distance:
                 min_distance = center_distance
                 crop_index = i
@@ -57,6 +57,10 @@ class LicensePlateDetection(AbstractYoloTRT):
 
         if is_saved:
             cv2.imwrite(f"{self.image_name}_cropped.jpg", crops[crop_index])
+
+    def run(self):
+        process_results = self.process()
+        self.postprocess(process_results)
 
 
 class LicensePlateOCR(AbstractYoloTRT):
