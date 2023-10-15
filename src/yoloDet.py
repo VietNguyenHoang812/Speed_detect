@@ -17,13 +17,13 @@ bindings = []
 
 
 class YoloTRT():
-    def __init__(self, library, engine, conf, yolo_ver):
+    def __init__(self, library, engine, conf, yolo_ver, categories):
         self.CONF_THRESH = conf 
         self.IOU_THRESHOLD = 0.4
         self.LEN_ALL_RESULT = 38001
         self.LEN_ONE_RESULT = 38
         self.yolo_version = yolo_ver
-        self.categories = ["plate", "other"]
+        self.categories = categories
         
         TRT_LOGGER = trt.Logger(trt.Logger.INFO)
 
