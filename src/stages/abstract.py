@@ -7,20 +7,20 @@ from src.yoloDet import YoloTRT
 from src.utils.calculator import calculate_distance
 
 class AbstractYoloTRT():
-    def __init__(self, library: str, engine: str, categories: List[str], source: Any, score_threshold: float = 0.5) -> None:
+    def __init__(self, library: str, engine: str, categories: List[str], score_threshold: float = 0.5) -> None:
+        self.ori_height = self.image.shape[0]
+        self.ori_width = self.image.shape[1]
+        self.score_threshold = score_threshold
+        self.model = YoloTRT(library=library, engine=engine, conf=0.5, yolo_ver="v5", categories=categories)
+        
+    def preprocess(self, source):
         if isinstance(source, str):
             self.image_name = source.split(".")[0]
             self.image = cv2.imread(source)
         else:
             self.image_name = "untitled"
             self.image = source
-        self.ori_height = self.image.shape[0]
-        self.ori_width = self.image.shape[1]
-        self.score_threshold = score_threshold
-        self.model = YoloTRT(library=library, engine=engine, conf=0.5, yolo_ver="v5", categories=categories)
-        
-    def preprocess(self):
-        pass
+        return self.image
 
     def process(self):
         pass
@@ -58,10 +58,13 @@ class LicensePlateDetection(AbstractYoloTRT):
 
         if is_saved:
             cv2.imwrite(f"{self.image_name}_cropped.jpg", crops[crop_index])
+        return crops[crop_index]
 
-    def run(self):
+    def run(self, source):
+        self.preprocess(source)
         process_results = self.process()
-        self.postprocess(process_results)
+        license_plate_box = self.postprocess(process_results)
+        return license_plate_box
 
 
 class LicensePlateOCR(AbstractYoloTRT):
@@ -127,14 +130,21 @@ class LicensePlateOCR(AbstractYoloTRT):
         
         return license_plate
 
-    def run(self):
+    def run(self, source):
+        self.preprocess(source)
         process_results = self.process()
         license_plate = self.postprocess(process_results)
         return license_plate
 
 
 class SpeedDetection(AbstractYoloTRT):
-    def preprocess(self):
+    def preprocess(self, source):
+        if isinstance(source, str):
+            self.image_name = source.split(".")[0]
+            self.image = cv2.imread(source)
+        else:
+            self.image_name = "untitled"
+            self.image = source
         # preprocessed_image_pathfile="temp.jpg"
         lower = np.array([140, 25, 220])
         upper = np.array([179, 255, 255])
