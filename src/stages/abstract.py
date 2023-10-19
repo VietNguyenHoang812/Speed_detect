@@ -8,8 +8,6 @@ from src.utils.calculator import calculate_distance
 
 class AbstractYoloTRT():
     def __init__(self, library: str, engine: str, categories: List[str], score_threshold: float = 0.5) -> None:
-        self.ori_height = self.image.shape[0]
-        self.ori_width = self.image.shape[1]
         self.score_threshold = score_threshold
         self.model = YoloTRT(library=library, engine=engine, conf=0.5, yolo_ver="v5", categories=categories)
         
@@ -20,6 +18,8 @@ class AbstractYoloTRT():
         else:
             self.image_name = "untitled"
             self.image = source
+        self.ori_height = self.image.shape[0]
+        self.ori_width = self.image.shape[1]
         return self.image
 
     def process(self):
