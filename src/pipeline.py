@@ -1,6 +1,8 @@
 import time
 
-from src.stages.abstract import LicensePlateDetection, LicensePlateOCR, SpeedDetection
+from src.stages.plate_detection import LicensePlateDetection
+from src.stages.plate_ocr import LicensePlateOCR
+from src.stages.speed_detect import SpeedDetection
 
 
 def pipeline(image_url: str):
