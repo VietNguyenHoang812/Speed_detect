@@ -1,4 +1,4 @@
-class SingleInstanceMetaClass(type):
+class Singleton(type):
     def __init__(self, name, bases, dic):
         self.__single_instance = None
         super().__init__(name, bases, dic)
