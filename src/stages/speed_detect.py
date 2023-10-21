@@ -7,17 +7,21 @@ from src.yoloDet import YoloTRT
 from src.utils.singleton import Singleton
 
 
-library = "weights/speed_detection/libmyplugins.so"
-engine = "weights/speed_detection/speed_detection.engine"
-categories = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-
+config = {
+    "library": "weights/speed_detection/libmyplugins.so",
+    "engine": "weights/speed_detection/speed_detection.engine",
+    "categories": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+}
 class SpeedDetection(metaclass=Singleton):
     def __init__(
             self, 
-            library: str = library, 
-            engine: str = engine, 
-            categories: List[str] = categories, 
+            library: str = None, 
+            engine: str = None, 
+            categories: List[str] = None, 
             score_threshold: float = 0.5) -> None:
+        library = config["library"] if library is None else library
+        engine = config["engine"] if engine is None else engine
+        categories = config["categories"] if categories is None else categories
         self.score_threshold = score_threshold
         self.model = YoloTRT(library=library, engine=engine, conf=0.5, yolo_ver="v5", categories=categories)
         
