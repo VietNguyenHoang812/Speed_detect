@@ -7,7 +7,14 @@ class PipelineOutputDTO(DTO):
         self.BKS = BKS
         self.speed = speed
     
-    def toResponse(self):
+    def toResponse(self, prediction_time: float):
         response = {
-            
+            "message": {
+                "image_url": self.image_url,
+                "BKS": self.BKS,
+                "speed": self.speed
+            },
+            "prediction_time": prediction_time,
+            "status_code": 200
         }
+        return response

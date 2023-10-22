@@ -1,5 +1,3 @@
-import time
-
 from fastapi import FastAPI, Body
 
 from src.pipeline import pipeline
@@ -15,11 +13,5 @@ async def hello():
 
 @app.post("/inference")
 async def inference(image_url: str = Body(...), reserve: int = Body(...)):
-    start_time = time.time()
-    result = pipeline(image_url)
-    processed_time = time.time() - start_time
-    response = {
-        "message": result,
-        "processed_time": processed_time
-    }
+    response = pipeline(image_url)
     return response
