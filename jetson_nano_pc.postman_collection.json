@@ -1,0 +1,53 @@
+{
+	"info": {
+		"_postman_id": "700186ec-4daa-44c9-8849-0ae88f11447b",
+		"name": "jetson_nano_pc",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30626134"
+	},
+	"item": [
+		{
+			"name": "nano",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"image_url\": \"/app/images/P1690088.JPG\",\n    \"reserve\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{jetsonip}}/inference",
+					"host": [
+						"{{jetsonip}}"
+					],
+					"path": [
+						"inference"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "nano",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{jetsonip}}/",
+					"host": [
+						"{{jetsonip}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
