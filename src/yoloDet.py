@@ -18,6 +18,7 @@ bindings = []
 
 class YoloTRT():
     def __init__(self, library, engine, conf, yolo_ver, categories):
+        print("Initiate YoloTRT")
         self.CONF_THRESH = conf 
         self.IOU_THRESHOLD = 0.4
         self.LEN_ALL_RESULT = 38001
@@ -80,6 +81,11 @@ class YoloTRT():
         return image, image_raw, h, w
 
     def Inference(self, img):
+        print(len(host_inputs))
+        print(len(host_outputs))
+        print(len(cuda_inputs))
+        print(len(cuda_outputs))
+        print(len(bindings))
         input_image, image_raw, origin_h, origin_w = self.PreProcessImg(img)
         np.copyto(host_inputs[0], input_image.ravel())
         stream = cuda.Stream()

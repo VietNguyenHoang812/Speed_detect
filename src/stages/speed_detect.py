@@ -70,7 +70,7 @@ class SpeedDetection(metaclass=Singleton):
                         preds_list.append([left_width, int(label_name), conf])
                     else:
                         preds_list.insert(0, [left_width, int(label_name), conf])
-                    
+        print(preds_list)            
         if len(preds_list) != 2:
             return -1
         else:
@@ -81,8 +81,8 @@ class SpeedDetection(metaclass=Singleton):
                 speed = n2*10+n1
         return speed
     
-    def run(self):
-        filtered_image = self.preprocess()
+    def run(self, source):
+        filtered_image = self.preprocess(source)
         process_results = self.process(filtered_image)
         speed = self.postprocess(process_results)
         return speed

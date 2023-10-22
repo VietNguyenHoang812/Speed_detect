@@ -3,7 +3,7 @@ import time
 from src.stages.plate_detection import LicensePlateDetection
 from src.stages.plate_ocr import LicensePlateOCR
 from src.stages.speed_detect import SpeedDetection
-from value_objects import PipelineOutputDTO
+from src.value_objects import PipelineOutputDTO
 
 
 def pipeline(image_url: str):

@@ -40,7 +40,7 @@ class LicensePlateDetection(metaclass=Singleton):
         detections, t, crops = self.model.Inference(self.image)
         return (detections, t, crops)
     
-    def postprocess(self, process_results, is_saved: bool = True):
+    def postprocess(self, process_results, is_saved: bool = False):
         detections, t, crops = process_results
         if len(detections) == 0:
             return None
